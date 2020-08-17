@@ -9,7 +9,7 @@
 
 Persil is a minimal and simple library for profiling events.
 It's based on rust's [measureme](https://docs.rs/measureme) and
-is just a simple, but powerful wrapper around `measureme`s api.
+is just a simple, but powerful layer ontop of `measureme`.
 
 ## Getting Started <a name = "getting_started"></a>
 
