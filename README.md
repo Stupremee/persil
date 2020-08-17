@@ -46,7 +46,7 @@ cargo add persil
 // You have to call `init` at the start of the program,
 // with the name of your application.
 //
-// Your results will be stored in `./trace/{app-name}`
+// Your results will be stored in `./trace/{app-name}-{pid}`
 persil::init("my_application");
 
 // To store the results in a custom path, use the `init_with_path` function.
