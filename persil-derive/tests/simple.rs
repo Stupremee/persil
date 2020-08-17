@@ -12,8 +12,17 @@ fn factorial_function() {
         p
     }
 
-    persil::init("tests");
+    persil::init("tests-app");
     factorial(10);
+}
+
+#[test]
+fn single_argument() {
+    #[trace("foo")]
+    fn bar() {}
+
+    persil::init("tests-app");
+    bar();
 }
 
 #[test]

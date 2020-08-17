@@ -18,23 +18,24 @@ use syn::{
 ///         ^^^^^^^  ^^^^^^^^^^^^
 ///         category    event
 struct Args {
-    category: LitStr,
-    event: LitStr,
+    category: String,
+    event: Option<String>,
 }
 
 impl Parse for Args {
     fn parse(input: ParseStream<'_>) -> syn::Result<Self> {
         let vars = Punctuated::<LitStr, Token![,]>::parse_terminated(input)?;
 
-        if vars.len() != 2 {
+        if vars.len() != 2 && vars.len() != 1 {
             return Err(Error::new_spanned(
                 vars,
-                "`trace` macro requires two strings as arguments",
+                "`trace` macro requires one or two strings as arguments",
             ));
         }
 
-        let category = vars[0].clone();
-        let event = vars[1].clone();
+        let mut iter = vars.into_iter();
+        let category = iter.next().unwrap().value();
+        let event = iter.next().map(|lit| lit.value());
         Ok(Args { category, event })
     }
 }
@@ -52,7 +53,7 @@ impl Parse for Args {
 /// use persil_derive::trace;
 ///
 /// /// Will start tracing the function in the `calculations`
-/// /// categroy and the `factorial` name.
+/// /// category and the `factorial` name.
 /// #[trace("calculations", "factorial")]
 /// fn factorial(mut n: u64) -> u64 {
 ///     let mut p = 1;
@@ -68,10 +69,13 @@ pub fn trace(args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as ItemFn);
     let args = parse_macro_input!(args as Args);
 
-    generate(args, input)
+    let event = args.event.unwrap_or_else(|| input.sig.ident.to_string());
+    let category = args.category;
+
+    generate(category, event, input)
 }
 
-fn generate(args: Args, fun: ItemFn) -> TokenStream {
+fn generate(category: String, event: String, fun: ItemFn) -> TokenStream {
     let ItemFn {
         attrs,
         vis,
@@ -112,7 +116,6 @@ fn generate(args: Args, fun: ItemFn) -> TokenStream {
         .into();
     }
 
-    let Args { category, event } = args;
     let body = quote! {
         let __profiler = persil::trace(#category, #event);
         #block

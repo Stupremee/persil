@@ -37,7 +37,7 @@
 //! persil::init("my_application");
 //!
 //! // To store the results in a custom path, use the `init_with_path` function.
-//! persil::init_with_path("./");
+//! // persil::init_with_path("./my_application");
 //!
 //! // This will enable the profiler.
 //! //
@@ -102,6 +102,8 @@ pub(crate) static PROFILER: OnceCell<Profiler> = OnceCell::new();
 /// # Example
 ///
 /// ```
+/// persil::init("tracing");
+///
 /// {
 ///     let _guard = persil::trace("Some", "Event");
 ///     some_time_intense_event();

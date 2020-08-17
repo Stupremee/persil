@@ -50,7 +50,8 @@ cargo add persil
 persil::init("my_application");
 
 // To store the results in a custom path, use the `init_with_path` function.
-persil::init_with_path("./");
+// The results will be stored at `<path>.events`, `<path>.strings`, etc
+persil::init_with_path("./my_application");
 
 // This will enable the profiler.
 //
