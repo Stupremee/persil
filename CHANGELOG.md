@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+### Added
+
+- `trace` proc macro, to trace a whole function
+
+### Changed
+
+### Removed
+
 ## [0.1.2] - 2020-08-17
 
 ### Added
