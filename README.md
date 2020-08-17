@@ -1,5 +1,13 @@
 # Persil
 
+[![Docs.rs][docs-badge]][docs-link]
+[![Crates.io][crate-badge]][crate-link]
+
+[docs-badge]: https://docs.rs/persil/badge.svg
+[docs-link]: https://docs.rs/persil
+[crate-badge]: https://img.shields.io/crates/v/persil.svg
+[crate-link]: https://crates.io/crates/persil
+
 ## Table of Contents
 + [About](#about)
 + [Getting Started](#getting_started)
