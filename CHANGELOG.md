@@ -21,4 +21,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.1.1
 ## 0.1.0
 
+<!-- next-url -->
 [Unreleased]: https://github.com/Stupremee/persil/compare/v0.1.1...HEAD
