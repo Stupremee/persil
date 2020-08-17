@@ -41,7 +41,7 @@
 //!
 //! // This will enable the profiler.
 //! //
-//! // If you don't call this method, there will be results emitted.
+//! // If you don't call this method, there will be no results emitted.
 //! persil::enable();
 //!
 //! // `trace` will start tracing an event.
