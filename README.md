@@ -52,6 +52,11 @@ persil::init("my_application");
 // To store the results in a custom path, use the `init_with_path` function.
 persil::init_with_path("./");
 
+// This will enable the profiler.
+//
+// If you don't call this method, there will be results emitted.
+persil::enable();
+
 // `trace` will start tracing an event.
 // An event is composed of a `category` and a `label`.
 // The `trace` function returns guard, that will stop tracing,

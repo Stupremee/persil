@@ -39,6 +39,11 @@
 //! // To store the results in a custom path, use the `init_with_path` function.
 //! persil::init_with_path("./");
 //!
+//! // This will enable the profiler.
+//! //
+//! // If you don't call this method, there will be results emitted.
+//! persil::enable();
+//!
 //! // `trace` will start tracing an event.
 //! // An event is composed of a `category` and a `label`.
 //! // The `trace` function returns guard, that will stop tracing,
@@ -79,12 +84,13 @@
 #![warn(clippy::pedantic)]
 
 mod profiler;
+
+pub use profiler::{disable, enable};
+
 use once_cell::sync::OnceCell;
-use profiler::{Profiler, Sink, TimingGuard};
+use profiler::{Guard, Profiler};
 
 pub(crate) static PROFILER: OnceCell<Profiler> = OnceCell::new();
-
-type Guard = TimingGuard<'static, Sink>;
 
 /// Starts tracing an event with the given `category` and a `name`.
 ///
@@ -104,7 +110,7 @@ type Guard = TimingGuard<'static, Sink>;
 ///     // ...
 /// }
 /// ```
-pub fn trace(category: impl AsRef<str>, event: impl AsRef<str>) -> Guard {
+pub fn trace(category: impl AsRef<str>, event: impl AsRef<str>) -> Guard<'static> {
     PROFILER
         .get()
         .expect(
