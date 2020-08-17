@@ -85,6 +85,7 @@
 
 mod profiler;
 
+pub use persil_derive::trace;
 pub use profiler::{disable, enable};
 
 use once_cell::sync::OnceCell;

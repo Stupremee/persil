@@ -15,3 +15,7 @@ categories = ["development-tools::profiling"]
 [dependencies]
 measureme = "0.7.1"
 once_cell = "1.4.0"
+persil-derive = { path = "./persil-derive" }
+
+[workspace]
+members = ["persil-derive"]
