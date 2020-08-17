@@ -44,6 +44,9 @@ impl Parse for Args {
 /// trace the whole function call with the given category
 /// and event name.
 ///
+/// If you only provide the first argument (category),
+/// then the function name wil be used as the event name.
+///
 /// `async` and `const` functions are not traceable and will
 /// throw a compile error.
 ///
