@@ -37,7 +37,7 @@
 //! persil::init("my_application");
 //!
 //! // To store the results in a custom path, use the `init_with_path` function.
-//! persil::init_with_path("my_application", "./");
+//! persil::init_with_path("./");
 //!
 //! // `trace` will start tracing an event.
 //! // An event is composed of a `category` and a `label`.
@@ -63,11 +63,6 @@
 //! # struct Item;
 //! ```
 //!
-//! **Enable the profiler in your binary.**
-//!
-//! To enable profiling, you have to enable the `profiler`
-//! feature in this crate. Otherwise the `trace` function will do nothing.
-//!
 //! **Analyze the results**
 //!
 //! To analye and display the results, you can use one of the tools in the [measureme repo](https://github.com/rust-lang/measureme).
@@ -83,34 +78,13 @@
 #![deny(missing_docs)]
 #![warn(clippy::pedantic)]
 
-#[cfg(feature = "profiler")]
 mod profiler;
-#[cfg(feature = "profiler")]
-use {
-    once_cell::sync::OnceCell,
-    profiler::{Profiler, Sink, TimingGuard},
-};
+use once_cell::sync::OnceCell;
+use profiler::{Profiler, Sink, TimingGuard};
 
-#[cfg(feature = "profiler")]
 pub(crate) static PROFILER: OnceCell<Profiler> = OnceCell::new();
 
-#[cfg(feature = "profiler")]
 type Guard = TimingGuard<'static, Sink>;
-#[cfg(not(feature = "profiler"))]
-type Guard = ();
-
-macro_rules! feature_impl {
-    ($a:expr, $b:expr) => {
-        #[cfg(feature = "profiler")]
-        {
-            $a
-        }
-        #[cfg(not(feature = "profiler"))]
-        {
-            $b
-        }
-    };
-}
 
 /// Starts tracing an event with the given `category` and a `name`.
 ///
@@ -130,42 +104,65 @@ macro_rules! feature_impl {
 ///     // ...
 /// }
 /// ```
-#[allow(unused_variables)]
 pub fn trace(category: impl AsRef<str>, event: impl AsRef<str>) -> Guard {
-    feature_impl! {
-        PROFILER
+    PROFILER
         .get()
         .expect(
             "persil profiler is not initialized. hint: initialize the profiler with `persil::init`",
         )
-        .trace(category.as_ref(), event.as_ref()),
-        ()
-    }
+        .trace(category.as_ref(), event.as_ref())
 }
 
 /// Initializes the global profiler with the given application name.
 ///
 /// The trace results will be stored in the `./trace` folder
 /// and all files will have `name-<pid>` as their prefix.
-#[allow(unused_variables)]
+///
+/// # Panics
+///
+/// Panics if the profiler is already initialized.
 pub fn init(name: impl AsRef<str>) {
-    feature_impl! {
-        {
-            let path = format!("./trace/{}-{}", name.as_ref(), std::process::id());
-            PROFILER.set(Profiler::new(path.as_ref())).ok().expect("persil profiler already initialized");
-        },
-        ()
-    }
+    try_init(name).expect("persil profiler already initialized");
+}
+
+/// Tries to initialize global profiler with the given name.
+///
+/// The trace results will be stored in the `./trace` folder
+/// and all files will have `name-<pid>` as their prefix.
+///
+/// # Return
+///
+/// Returns `Ok` if the profiler was successfully initialized
+/// and `Err` if the profiler is already initialized.
+pub fn try_init(name: impl AsRef<str>) -> Result<(), ()> {
+    let path = format!("./trace/{}-{}", name.as_ref(), std::process::id());
+    PROFILER.set(Profiler::new(path.as_ref())).map_err(|_| ())
 }
 
 /// Initializes the global profiler and will store the results
 /// at the given path.
 ///
 /// The results will be stored as `<path>.events`, `<path>.strings`, etc.
-#[allow(unused_variables)]
+///
+/// # Panics
+///
+/// Panics if the profiler is already initialized.
 pub fn init_with_path(path: impl AsRef<std::path::Path>) {
-    feature_impl! {
-        PROFILER.set(Profiler::new(path.as_ref())).ok().expect("persil profiler already initialized"),
-        ()
-    }
+    PROFILER
+        .set(Profiler::new(path.as_ref()))
+        .ok()
+        .expect("persil profiler already initialized")
+}
+
+/// Tries to initializethe global profiler and will store the results
+/// at the given path.
+///
+/// The results will be stored as `<path>.events`, `<path>.strings`, etc.
+///
+/// # Return
+///
+/// Returns `Ok` if the profiler was successfully initialized or `Err`
+/// if the profiler is already initialized.
+pub fn try_init_with_path(path: impl AsRef<std::path::Path>) -> Result<(), ()> {
+    PROFILER.set(Profiler::new(path.as_ref())).map_err(|_| ())
 }

@@ -50,7 +50,7 @@ cargo add persil
 persil::init("my_application");
 
 // To store the results in a custom path, use the `init_with_path` function.
-persil::init_with_path("my_application", "./");
+persil::init_with_path("./");
 
 // `trace` will start tracing an event.
 // An event is composed of a `category` and a `label`.
@@ -70,11 +70,6 @@ parse_item().unwrap();
 // You can also drop the guard manually to stop tracing.
 drop(profiler);
 ```
-
-**Enable the profiler in your binary.**
-
-To enable profiling, you have to enable the `profiler`
-feature in this crate. Otherwise the `trace` function will do nothing.
 
 **Analyze the results**
 
