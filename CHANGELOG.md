@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 <!-- next-header -->
 ## [Unreleased] - ReleaseDate
 
+## [0.1.2] - 2020-08-17
+
 ### Added
 
 - Add `try_*` methods that will return a `Result`
@@ -22,4 +24,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## 0.1.0
 
 <!-- next-url -->
-[Unreleased]: https://github.com/Stupremee/persil/compare/v0.1.1...HEAD
+[Unreleased]: https://github.com/Stupremee/persil/compare/v0.1.2...HEAD
+[0.1.2]: https://github.com/Stupremee/persil/compare/v0.1.1...v0.1.2
