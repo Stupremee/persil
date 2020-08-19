@@ -7,7 +7,12 @@
 //! [`Profiler`]: ./struct.Profiler.html
 
 use measureme::TimingGuard;
-use std::{error::Error, path::Path, thread::ThreadId};
+use std::{
+    error::Error,
+    path::Path,
+    sync::atomic::{AtomicBool, Ordering},
+    thread::ThreadId,
+};
 
 /// `MmapSerializationSink` is faster on macOS and Linux
 /// but `FileSerializationSink` is faster on Windows
@@ -30,15 +35,17 @@ pub struct Guard<'guard> {
 /// is dropped.
 pub struct Profiler {
     profiler: measureme::Profiler<Sink>,
+    enabled: AtomicBool,
 }
 
 impl Profiler {
     /// Creates a new `Profiler` with the given path.
     ///
     /// The profiling results will be stored at `<path>.events`, `<path>.strings`, etc.
-    pub fn new(path: impl AsRef<Path>) -> Result<Self, Box<dyn Error>> {
+    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, Box<dyn Error>> {
         Ok(Self {
             profiler: measureme::Profiler::new(path.as_ref())?,
+            enabled: AtomicBool::default(),
         })
     }
 
@@ -47,14 +54,34 @@ impl Profiler {
     /// The profiling results will be stored at `<name>-<pid>.events`, etc.
     pub fn from_name(name: impl AsRef<str>) -> Result<Self, Box<dyn Error>> {
         let path = format!("{}-{}", name.as_ref(), std::process::id());
+        Self::from_path(path)
+    }
 
-        Ok(Self {
-            profiler: measureme::Profiler::new(path.as_ref())?,
-        })
+    /// Enables the `Profiler`.
+    ///
+    /// A `Profiler`, that is created via [`from_path`] or [`from_name`],
+    /// is disabled by default so you have to enable it first using this method.
+    ///
+    /// [`from_path`]: ./fn.from_path.html
+    /// [`from_name`]: ./fn.from_name.html
+    pub fn enable(&self) {
+        self.enabled.store(true, Ordering::SeqCst);
+    }
+
+    /// Disables the `Profiler`.
+    ///
+    /// This method will make the profiler stop recording any new events
+    /// but will still write all stored results to disk if dropped.
+    pub fn disable(&self) {
+        self.enabled.store(false, Ordering::SeqCst);
     }
 
     /// Starts profiling an event with the given `category` and `label`.
     pub fn trace(&self, category: &str, label: &str) -> Guard<'_> {
+        if !self.enabled.load(Ordering::SeqCst) {
+            return Guard { _inner: None };
+        }
+
         let kind = self.profiler.alloc_string(category);
 
         let label = self.profiler.alloc_string(label);
