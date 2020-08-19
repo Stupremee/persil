@@ -9,11 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- `trace` proc macro, to trace a whole function
+- `Profiler` struct with `trace` function
 
 ### Changed
 
+- Rework whole API. The api is now based around a `Profiler` struct
+
 ### Removed
+
+- All global methods `trace`, `init`, etc
 
 ## [0.1.2] - 2020-08-17
 

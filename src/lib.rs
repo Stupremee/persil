@@ -50,5 +50,4 @@
 
 mod profiler;
 
-pub use persil_derive::trace;
 pub use profiler::*;
