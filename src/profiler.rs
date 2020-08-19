@@ -42,6 +42,11 @@ impl Profiler {
     /// Creates a new `Profiler` with the given path.
     ///
     /// The profiling results will be stored at `<path>.events`, `<path>.strings`, etc.
+    ///
+    /// # Errors
+    ///
+    /// The method will fail if the path does not exist or some other error
+    /// occurrs while initializing the profiler.
     pub fn from_path(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
         let path = path.into();
 
@@ -61,6 +66,11 @@ impl Profiler {
     /// Creates a new `Profiler` from a given application name.
     ///
     /// The profiling results will be stored at `./trace/<name>-<pid>.events`, etc.
+    ///
+    /// # Errors
+    ///
+    /// The method will fail if the path does not exist or some other error
+    /// occurrs while initializing the profiler.
     pub fn from_name(name: impl AsRef<str>) -> Result<Self, Box<dyn Error>> {
         let path = format!("./trace/{}-{}", name.as_ref(), std::process::id());
         Self::from_path(path)
@@ -86,6 +96,7 @@ impl Profiler {
     }
 
     /// Starts profiling an event with the given `category` and `label`.
+    #[allow(clippy::cast_possible_truncation)]
     pub fn trace(&self, category: &str, label: &str) -> Guard<'_> {
         if !self.enabled.load(Ordering::SeqCst) {
             return Guard { _inner: None };
