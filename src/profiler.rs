@@ -1,19 +1,13 @@
 //! The actual implementation of the `persil` logic.
 //!
-//! The module is built around the [`Profiler`].
-//! There's one global instance that will be used by every
-//! [`trace`] call and can be initialized with [`persil::init`].
+//! The module is built around the [`Profiler`] struct which
+//! is meant to passed around multiple "trace points" which then
+//! can be used to record events.
 //!
 //! [`Profiler`]: ./struct.Profiler.html
-//! [`trace`]: ../fn.trace.html
-//! [`persil::init`]: ../fn.init.html
 
 use measureme::TimingGuard;
-use std::{
-    path::Path,
-    sync::atomic::{AtomicBool, Ordering},
-    thread::ThreadId,
-};
+use std::{error::Error, path::Path, thread::ThreadId};
 
 /// `MmapSerializationSink` is faster on macOS and Linux
 /// but `FileSerializationSink` is faster on Windows
@@ -21,26 +15,6 @@ use std::{
 type Sink = measureme::MmapSerializationSink;
 #[cfg(windows)]
 type Sink = measureme::FileSerializationSink;
-
-/// Indicates if the profiler will trace events.
-const ENABLED: AtomicBool = AtomicBool::new(false);
-
-/// Enables the global profiler.
-///
-/// The profiler will only emit results if it's enabled using this method.
-pub fn enable() {
-    ENABLED.store(true, Ordering::SeqCst)
-}
-
-/// Disables the global profiler.
-///
-/// After this method is called, there will be no results emitted and
-/// every [`trace`] call is basically a no-op.
-///
-/// [`trace`]: ../fn.trace.html
-pub fn disable() {
-    ENABLED.store(false, Ordering::SeqCst)
-}
 
 /// When a `Guard` is dropped, it will stop recording the
 /// event of the inner profiler.
@@ -50,25 +24,37 @@ pub struct Guard<'guard> {
     _inner: Option<TimingGuard<'guard, Sink>>,
 }
 
-/// The `Profiler` struct is used to start tracing events.
-pub(crate) struct Profiler {
+/// The `Profiler` struct is used to trace events.
+///
+/// The events will be stored on disk, if the profiler instance
+/// is dropped.
+pub struct Profiler {
     profiler: measureme::Profiler<Sink>,
 }
 
 impl Profiler {
     /// Creates a new `Profiler` with the given path.
-    pub(crate) fn new(path: &Path) -> Profiler {
-        Self {
-            profiler: measureme::Profiler::new(path).expect("failed to create profiler"),
-        }
+    ///
+    /// The profiling results will be stored at `<path>.events`, `<path>.strings`, etc.
+    pub fn new(path: impl AsRef<Path>) -> Result<Self, Box<dyn Error>> {
+        Ok(Self {
+            profiler: measureme::Profiler::new(path.as_ref())?,
+        })
+    }
+
+    /// Creates a new `Profiler` from a given application name.
+    ///
+    /// The profiling results will be stored at `<name>-<pid>.events`, etc.
+    pub fn from_name(name: impl AsRef<str>) -> Result<Self, Box<dyn Error>> {
+        let path = format!("{}-{}", name.as_ref(), std::process::id());
+
+        Ok(Self {
+            profiler: measureme::Profiler::new(path.as_ref())?,
+        })
     }
 
     /// Starts profiling an event with the given `category` and `label`.
-    pub(crate) fn trace(&self, category: &str, label: &str) -> Guard<'_> {
-        if ENABLED.load(Ordering::Relaxed) {
-            return Guard { _inner: None };
-        }
-
+    pub fn trace(&self, category: &str, label: &str) -> Guard<'_> {
         let kind = self.profiler.alloc_string(category);
 
         let label = self.profiler.alloc_string(label);

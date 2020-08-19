@@ -43,38 +43,7 @@ cargo add persil
 ## Usage <a name = "usage"></a>
 
 ```rust
-// You have to call `init` at the start of the program,
-// with the name of your application.
-//
-// Your results will be stored in `./trace/{app-name}-{pid}`
-persil::init("my_application");
-
-// To store the results in a custom path, use the `init_with_path` function.
-// The results will be stored at `<path>.events`, `<path>.strings`, etc
-persil::init_with_path("./my_application");
-
-// This will enable the profiler.
-//
-// If you don't call this method, there will be no results emitted.
-persil::enable();
-
-// `trace` will start tracing an event.
-// An event is composed of a `category` and a `label`.
-// The `trace` function returns guard, that will stop tracing,
-// if it's dropped. 
-{
-  let _profiler = persil::trace("Parsing", "Expression");
-  let expr = parse_expression().unwrap();
-
-  // `_profiler` is dropped here so it will stop tracing
-  // at the end of this scope
-}
-
-let profiler = persil::trace("Parsing", "Item");
-parse_item().unwrap();
-
-// You can also drop the guard manually to stop tracing.
-drop(profiler);
+// todo
 ```
 
 **Analyze the results**
