@@ -16,8 +16,8 @@
 ## About <a name = "about"></a>
 
 Persil is a minimal and simple library for profiling events.
-It's based on rust's [measureme](https://docs.rs/measureme) and
-is just a simple, but powerful layer ontop of `measureme`.
+It's based on rust's [measureme](https://docs.rs/measureme) serialization format and
+thus the results can be analysed using the tools in the [measureme repository](https://github.com/rust-lang/measureme).
 
 ## Getting Started <a name = "getting_started"></a>
 
@@ -53,5 +53,3 @@ For example to use `summarize`, just do:
 # if you changed the path to the results, use the new path
 summarize trace/my_application
 ```
-
-For more information checkout the [measureme](https://github.com/rust-lang/measureme) repository.
