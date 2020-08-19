@@ -42,9 +42,7 @@ cargo add persil
 
 ## Usage <a name = "usage"></a>
 
-```rust
-// todo
-```
+See [examples](https://github.com/Stupremee/persil/blob/master/examples/simple.rs) for usage.
 
 **Analyze the results**
 
