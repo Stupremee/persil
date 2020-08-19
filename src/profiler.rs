@@ -9,7 +9,7 @@
 use measureme::TimingGuard;
 use std::{
     error::Error,
-    path::Path,
+    path::PathBuf,
     sync::atomic::{AtomicBool, Ordering},
     thread::ThreadId,
 };
@@ -42,7 +42,16 @@ impl Profiler {
     /// Creates a new `Profiler` with the given path.
     ///
     /// The profiling results will be stored at `<path>.events`, `<path>.strings`, etc.
-    pub fn from_path(path: impl AsRef<Path>) -> Result<Self, Box<dyn Error>> {
+    pub fn from_path(path: impl Into<PathBuf>) -> Result<Self, Box<dyn Error>> {
+        let path = path.into();
+
+        match path.parent() {
+            Some(parent) if !path.exists() => {
+                std::fs::create_dir_all(parent)?;
+            }
+            _ => {}
+        }
+
         Ok(Self {
             profiler: measureme::Profiler::new(path.as_ref())?,
             enabled: AtomicBool::default(),
@@ -51,9 +60,9 @@ impl Profiler {
 
     /// Creates a new `Profiler` from a given application name.
     ///
-    /// The profiling results will be stored at `<name>-<pid>.events`, etc.
+    /// The profiling results will be stored at `./trace/<name>-<pid>.events`, etc.
     pub fn from_name(name: impl AsRef<str>) -> Result<Self, Box<dyn Error>> {
-        let path = format!("{}-{}", name.as_ref(), std::process::id());
+        let path = format!("./trace/{}-{}", name.as_ref(), std::process::id());
         Self::from_path(path)
     }
 
